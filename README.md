@@ -2,7 +2,9 @@
 
 Entrega de Visão Computacional da Global Solution 2026/2 (CitizenTech). Estende o protótipo Orienta Saúde com uma aba **Inspeção predial**: o usuário envia uma foto ou um vídeo curto de uma UBS ou UPA, e o app sinaliza possíveis fissuras no concreto, mostrando a região suspeita e a confiança do modelo.
 
-**Integrantes:** [preencher com os nomes completos]
+**Professor:** Ícaro Gonçalves
+
+**Integrante:** Guilherme Gama Bitencourt Souza (RM565293)
 
 ## Problema e limite de uso
 
