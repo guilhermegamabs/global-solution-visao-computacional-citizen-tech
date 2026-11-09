@@ -1,0 +1,38 @@
+{
+  "equipment": {
+    "processor": "AMD Ryzen 5 5600 6-Core Processor",
+    "logicalCores": 12,
+    "system": "Windows 11",
+    "python": "3.12.10",
+    "onnxruntime": "1.31.1",
+    "providers": [
+      "CPUExecutionProvider"
+    ]
+  },
+  "singleImage224": {
+    "resolution": "224x224",
+    "meanMs": 0.82,
+    "medianMs": 0.81,
+    "p95Ms": 1.02,
+    "perSecond": 1214.84,
+    "runs": 200
+  },
+  "tileBatch": {
+    "resolution": "224x224",
+    "batchSize": 10,
+    "meanMs": 5.23,
+    "medianMs": 5.36,
+    "p95Ms": 6.18,
+    "perSecond": 191.31,
+    "runs": 100
+  },
+  "fullPhotoPipeline": {
+    "resolution": "1024x768",
+    "description": "recorte em grade 3x3, pré-processamento e inferência de 10 imagens",
+    "meanMs": 26.05,
+    "medianMs": 26.08,
+    "p95Ms": 28.84,
+    "perSecond": 38.39,
+    "runs": 100
+  }
+}
