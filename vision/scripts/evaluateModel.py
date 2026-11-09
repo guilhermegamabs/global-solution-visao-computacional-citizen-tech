@@ -12,9 +12,9 @@ from sklearn.metrics import confusion_matrix, precision_recall_fscore_support
 
 from vision import settings
 
-azulPrimario = "#0B5FA5"
-azulProfundo = "#073B6B"
-vermelho = "#D32F2F"
+azulPrimario = "#000000"
+azulProfundo = "#000000"
+vermelho = "#666666"
 mediaImagenet = np.array(settings.mediaImagenet, dtype=np.float32)
 desvioImagenet = np.array(settings.desvioImagenet, dtype=np.float32)
 limiarReferencia = 0.5
@@ -126,7 +126,7 @@ def avaliarRobustez(sessao, imagens, reais, limiar):
 
 def salvarMatriz(matriz, limiar):
     figura, eixo = plt.subplots(figsize=(4.6, 4))
-    eixo.imshow(matriz, cmap="Blues")
+    eixo.imshow(matriz, cmap="Greys")
     eixo.set_xticks([0, 1], settings.nomesClasses)
     eixo.set_yticks([0, 1], settings.nomesClasses)
     eixo.set_xlabel("Previsto")
@@ -144,10 +144,10 @@ def salvarMatriz(matriz, limiar):
 def salvarVarredura(varredura, limiar):
     figura, eixo = plt.subplots(figsize=(6, 3.8))
     limiares = [item["threshold"] for item in varredura]
-    eixo.plot(limiares, [item["precision"] for item in varredura], color=azulPrimario, label="Precisão")
-    eixo.plot(limiares, [item["recall"] for item in varredura], color=vermelho, label="Recall")
-    eixo.plot(limiares, [item["f1"] for item in varredura], color="#1B8A5A", label="F1")
-    eixo.axvline(limiar, color="gray", linestyle="--", label=f"Escolhido ({limiar:.2f})")
+    eixo.plot(limiares, [item["precision"] for item in varredura], color="#000000", linestyle="-", label="Precisão")
+    eixo.plot(limiares, [item["recall"] for item in varredura], color="#555555", linestyle="--", label="Recall")
+    eixo.plot(limiares, [item["f1"] for item in varredura], color="#000000", linestyle=":", linewidth=2, label="F1")
+    eixo.axvline(limiar, color="#999999", linestyle="-.", label=f"Escolhido ({limiar:.2f})")
     eixo.set_xlabel("Limiar de confiança")
     eixo.set_ylabel("Métrica na validação")
     eixo.legend()
@@ -163,11 +163,11 @@ def salvarCurvasTreino():
         return
     historico = pd.read_csv(caminho)
     figura, (eixoPerda, eixoF1) = plt.subplots(1, 2, figsize=(9, 3.6))
-    eixoPerda.plot(historico["trainLoss"].values, color=azulPrimario, label="Treino")
-    eixoPerda.plot(historico["valLoss"].values, color=vermelho, label="Validação")
+    eixoPerda.plot(historico["trainLoss"].values, color="#000000", linestyle="-", label="Treino")
+    eixoPerda.plot(historico["valLoss"].values, color="#555555", linestyle="--", label="Validação")
     eixoPerda.set_title("Perda por época")
     eixoPerda.legend()
-    eixoF1.plot(historico["valF1"].values, color="#1B8A5A")
+    eixoF1.plot(historico["valF1"].values, color="#000000")
     eixoF1.set_title("F1 de validação por época")
     for eixo in (eixoPerda, eixoF1):
         eixo.set_xlabel("Época")

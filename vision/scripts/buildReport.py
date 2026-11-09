@@ -15,7 +15,7 @@ from reportlab.lib.enums import TA_JUSTIFY
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import cm
-from reportlab.platypus import Image, KeepTogether, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+from reportlab.platypus import HRFlowable, Image, KeepTogether, PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
 from vision import settings
 
@@ -24,19 +24,19 @@ sys.path.insert(0, str(settings.raizProjeto / "backend"))
 from app.pipelines.inspectionPipeline import analisarImagem, analisarVideo
 from app.providers.classifierProvider import classificarLote
 
-azulProfundo = colors.HexColor("#073B6B")
-azulPrimario = colors.HexColor("#0B5FA5")
-azulSuave = colors.HexColor("#EAF3FC")
+azulProfundo = colors.black
+azulPrimario = colors.HexColor("#333333")
+azulSuave = colors.HexColor("#F0F0F0")
 caminhoRelatorio = settings.pastaRelatorio / "relatorioInspecaoPredial.pdf"
 larguraUtil = A4[0] - 4 * cm
 
 estilos = getSampleStyleSheet()
-estiloTitulo = ParagraphStyle("titulo", parent=estilos["Title"], textColor=azulProfundo, fontSize=20, leading=24, spaceAfter=4)
-estiloSubtitulo = ParagraphStyle("subtitulo", parent=estilos["Normal"], textColor=azulPrimario, fontSize=11, alignment=1, spaceAfter=10)
+estiloTitulo = ParagraphStyle("titulo", parent=estilos["Title"], textColor=colors.black, fontSize=18, leading=22, spaceAfter=4)
+estiloSubtitulo = ParagraphStyle("subtitulo", parent=estilos["Normal"], textColor=colors.HexColor("#555555"), fontSize=10, alignment=0, spaceAfter=8)
 estiloSecao = ParagraphStyle("secao", parent=estilos["Heading2"], textColor=azulProfundo, fontSize=13, spaceBefore=12, spaceAfter=5)
 estiloCorpo = ParagraphStyle("corpo", parent=estilos["Normal"], fontSize=10, leading=14, alignment=TA_JUSTIFY, spaceAfter=5)
 estiloLista = ParagraphStyle("lista", parent=estiloCorpo, leftIndent=14, bulletIndent=2, spaceAfter=2)
-estiloLegenda = ParagraphStyle("legenda", parent=estilos["Normal"], fontSize=8.5, leading=11, textColor=colors.HexColor("#3E5B78"), alignment=1, spaceAfter=8)
+estiloLegenda = ParagraphStyle("legenda", parent=estilos["Normal"], fontSize=8.5, leading=11, textColor=colors.HexColor("#444444"), alignment=1, spaceAfter=8)
 estiloCelula = ParagraphStyle("celula", parent=estilos["Normal"], fontSize=9, leading=11)
 estiloCabecalho = ParagraphStyle("cabecalho", parent=estiloCelula, textColor=colors.white, fontName="Helvetica-Bold")
 
@@ -64,9 +64,9 @@ def montarTabela(cabecalho, linhas, larguras):
     tabela.setStyle(
         TableStyle(
             [
-                ("BACKGROUND", (0, 0), (-1, 0), azulProfundo),
+                ("BACKGROUND", (0, 0), (-1, 0), azulPrimario),
                 ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, azulSuave]),
-                ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#C9DDF0")),
+                ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#BBBBBB")),
                 ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
                 ("TOPPADDING", (0, 0), (-1, -1), 4),
                 ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
@@ -100,8 +100,8 @@ def graficoLinhaDoTempo(resultado):
     figuraBase, eixo = plt.subplots(figsize=(7, 2.8))
     tempos = [ponto.timeSeconds for ponto in resultado.timeline]
     probabilidades = [ponto.crackProbability for ponto in resultado.timeline]
-    eixo.plot(tempos, probabilidades, color="#073B6B", marker="o", markersize=4)
-    eixo.axhline(resultado.threshold, color="#D32F2F", linestyle="--", label=f"Limiar {resultado.threshold:.2f}")
+    eixo.plot(tempos, probabilidades, color="#000000", marker="o", markersize=4)
+    eixo.axhline(resultado.threshold, color="#555555", linestyle="--", label=f"Limiar {resultado.threshold:.2f}")
     eixo.set_ylim(0, 1.05)
     eixo.set_xlabel("Tempo do vídeo (s)")
     eixo.set_ylabel("Probabilidade de fissura")
@@ -114,13 +114,64 @@ def graficoLinhaDoTempo(resultado):
     return saida.getvalue()
 
 
+def semRodape(tela, documento):
+    return None
+
+
 def rodape(tela, documento):
     tela.saveState()
     tela.setFont("Helvetica", 8)
-    tela.setFillColor(colors.HexColor("#3E5B78"))
-    tela.drawString(2 * cm, 1.2 * cm, "CitizenTech · Orienta Saúde · Inspeção predial com visão computacional")
-    tela.drawRightString(A4[0] - 2 * cm, 1.2 * cm, f"Página {documento.page}")
+    tela.setFillColor(colors.HexColor("#444444"))
+    tela.drawString(2 * cm, 1.2 * cm, "CitizenTech 2026.2  |  Global Solution  |  Visão Computacional")
+    tela.drawRightString(A4[0] - 2 * cm, 1.2 * cm, f"Página {documento.page - 1}")
     tela.restoreState()
+
+
+def montarCapa():
+    centro = ParagraphStyle("centro", parent=estilos["Normal"], alignment=1, fontSize=10, leading=14)
+    destaque = ParagraphStyle("destaque", parent=centro, fontName="Helvetica-Bold", fontSize=12)
+    tituloCapa = ParagraphStyle("tituloCapa", parent=centro, fontName="Helvetica-Bold", fontSize=22, leading=28, spaceAfter=10)
+    campos = [
+        ["Disciplina", "Visão Computacional"],
+        ["Professor", "Ícaro Gonçalves"],
+        ["Turma", "2TIAPY-2026"],
+        ["Ano / semestre", "2026 · 2º semestre (Global Solution 2026.2)"],
+        ["Integrante", "Guilherme Gama Bitencourt Souza · RM565293"],
+    ]
+    tabela = Table(
+        [[Paragraph(f"<b>{nome}</b>", estiloCelula), Paragraph(valor, estiloCelula)] for nome, valor in campos],
+        colWidths=[3.6 * cm, 11.6 * cm],
+    )
+    tabela.setStyle(
+        TableStyle(
+            [
+                ("LINEBELOW", (0, 0), (-1, -1), 0.5, colors.HexColor("#999999")),
+                ("TOPPADDING", (0, 0), (-1, -1), 7),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ]
+        )
+    )
+    return [
+        Spacer(1, 2.2 * cm),
+        Paragraph("FIAP", destaque),
+        Paragraph("Faculdade de Informática e Administração Paulista", centro),
+        Paragraph("Tecnologia em Inteligência Artificial", centro),
+        Spacer(1, 0.5 * cm),
+        HRFlowable(width="100%", thickness=1, color=colors.black),
+        Spacer(1, 2.2 * cm),
+        Paragraph("GLOBAL SOLUTION 2026.2", centro),
+        Spacer(1, 0.3 * cm),
+        Paragraph("Visão Computacional", centro),
+        Spacer(1, 1.8 * cm),
+        Paragraph("CitizenTech · Orienta Saúde", tituloCapa),
+        Paragraph("Inspeção predial: classificação de fissuras em concreto com visão computacional para apoiar a triagem de locais para inspeção", centro),
+        Spacer(1, 2.2 * cm),
+        tabela,
+        Spacer(1, 2.4 * cm),
+        Paragraph(f"São Paulo · {date.today().strftime('%m/%Y')}".replace("11/2026", "novembro de 2026"), centro),
+        PageBreak(),
+    ]
 
 
 def montarHistorias(metricas, benchmark, exemploImagem, exemploVideo):
@@ -135,9 +186,9 @@ def montarHistorias(metricas, benchmark, exemploImagem, exemploVideo):
     equipamento = benchmark["equipment"]
     historias = []
 
-    historias.append(Paragraph("Inspeção predial com visão computacional", estiloTitulo))
-    historias.append(Paragraph(f"Relatório técnico · Global Solution 2026/2 · CitizenTech · {date.today().strftime('%d/%m/%Y')}", estiloSubtitulo))
-    historias.append(paragrafo("<b>Integrantes:</b> [preencher com os nomes completos]"))
+    historias.extend(montarCapa())
+    historias.append(Paragraph("CitizenTech · Orienta Saúde", estiloTitulo))
+    historias.append(Paragraph("Inspeção predial com visão computacional: classificação de fissuras em concreto · Global Solution 2026.2 · Visão Computacional · Tecnologia em Inteligência Artificial (FIAP)", estiloSubtitulo))
 
     historias.append(Paragraph("1. Objetivo e limite de uso", estiloSecao))
     historias.append(
@@ -340,7 +391,7 @@ def executar():
         title="Inspeção predial com visão computacional",
         author="CitizenTech",
     )
-    documento.build(montarHistorias(metricas, benchmark, exemploImagem, exemploVideo), onFirstPage=rodape, onLaterPages=rodape)
+    documento.build(montarHistorias(metricas, benchmark, exemploImagem, exemploVideo), onFirstPage=semRodape, onLaterPages=rodape)
     print(f"Relatório salvo em {caminhoRelatorio}")
 
 
