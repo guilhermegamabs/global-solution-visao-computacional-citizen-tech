@@ -1,0 +1,7 @@
+*.pdf binary
+*.onnx binary
+*.mp4 binary
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.ipynb text eol=lf
